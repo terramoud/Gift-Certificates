@@ -1,15 +1,23 @@
-plugins {
-    id 'java'
+allprojects {
+    apply plugin: 'java'
+    sourceCompatibility = 11
+    targetCompatibility = 11
+
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        compileOnly 'javax.servlet:javax.servlet-api:4.0.1'
+        implementation 'org.springframework:spring-webmvc:5.2.22.RELEASE'
+        testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.9.0'
+        testImplementation 'org.springframework:spring-test:5.2.22.RELEASE'
+        implementation 'com.fasterxml.jackson.core:jackson-databind:2.8.9'
+        implementation 'io.vertx:vertx-core:3.5.3'
+        implementation group: 'javax.validation', name: 'validation-api', version: '2.0.1.Final'
+    }
+
+    test {
+        useJUnitPlatform()
+    }
 }
-
-group 'com.epam.esm'
-version '1.0'
-
-repositories {
-    mavenCentral()
-}
-
-dependencies {
-    testCompile group: 'junit', name: 'junit', version: '4.12'
-}
-
