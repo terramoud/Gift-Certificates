@@ -1,20 +1,30 @@
 package com.epam.esm.domain.entity;
 
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 
 /**
  * Represents relevant entity from database's table
  *
- * @author Alexander Koreshev
+ * @author Oleksadr Koreshev
  * @since 1.0
  */
 public class Certificate extends Entity {
+
     private String description;
+
     private BigDecimal price;
-    private int duration;
+
+    private Integer duration;
+
     private LocalDateTime createDate;
+
     private LocalDateTime lastUpdateDate;
 
     public Certificate() {
@@ -52,16 +62,22 @@ public class Certificate extends Entity {
         this.price = price;
     }
 
-    public int getDuration() {
+    public Integer getDuration() {
         return duration;
     }
 
-    public void setDuration(int duration) {
+    public void setDuration(Integer duration) {
         this.duration = duration;
     }
 
     public LocalDateTime getCreateDate() {
         return createDate;
+    }
+
+    public void setCreateDate(String createDate) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS")
+                .withZone(ZoneId.of("UTC"));
+        this.createDate = LocalDateTime.parse(createDate, formatter);
     }
 
     public void setCreateDate(LocalDateTime createDate) {
@@ -70,6 +86,12 @@ public class Certificate extends Entity {
 
     public LocalDateTime getLastUpdateDate() {
         return lastUpdateDate;
+    }
+
+    public void setLastUpdateDate(String lastUpdateDate) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS")
+                .withZone(ZoneId.of("UTC"));
+        this.createDate = LocalDateTime.parse(lastUpdateDate, formatter);
     }
 
     public void setLastUpdateDate(LocalDateTime lastUpdateDate) {
@@ -94,8 +116,8 @@ public class Certificate extends Entity {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Certificate that = (Certificate) o;
-        return id == that.id &&
-                duration == that.duration &&
+        return id.equals(that.id) &&
+                duration.equals(that.duration) &&
                 name.equals(that.name) &&
                 description.equals(that.description) &&
                 price.equals(that.price) &&

@@ -1,17 +1,17 @@
 package com.epam.esm.config;
 
+import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer;
 
 public class MyServletInitializer
         extends AbstractAnnotationConfigDispatcherServletInitializer {
 
-    // services and data sources
     @Override
     protected Class<?>[] getRootConfigClasses() {
         return new Class[0];
     }
 
-    // controller, view resolver, handler mapping
     @Override
     protected Class<?>[] getServletConfigClasses() {
         return new Class[]{SpringWebConfig.class};
@@ -19,6 +19,13 @@ public class MyServletInitializer
 
     @Override
     protected String[] getServletMappings() {
-        return new String[]{"/"};
+        return new String[]{"/*"};
+    }
+
+    @Override
+    protected DispatcherServlet createDispatcherServlet(WebApplicationContext servletAppContext) {
+        DispatcherServlet ds = new DispatcherServlet(servletAppContext);
+        ds.setThrowExceptionIfNoHandlerFound(true);
+        return ds;
     }
 }
