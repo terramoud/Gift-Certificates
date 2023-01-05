@@ -3,20 +3,20 @@ package com.epam.esm.exceptions;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 
-public class GlobalResourceException extends RuntimeException {
+public class ResourceException extends RuntimeException {
     private String details;
     private String errorCode;
 
-    public GlobalResourceException(String message, Long resourceId, String errorCode) {
+    public ResourceException(String message, Long resourceId, ErrorCodes errorCode) {
         super(message);
         this.details = "(id = " + resourceId + ")";
-        this.errorCode = errorCode;
+        this.errorCode = errorCode.stringCode();
     }
 
-    public GlobalResourceException(String message, String resourceName, String errorCode) {
+    public ResourceException(String message, String resourceName, ErrorCodes errorCode) {
         super(message);
         this.details = "(name = " + resourceName + ")";
-        this.errorCode = errorCode;
+        this.errorCode = errorCode.stringCode();
     }
 
     /**
@@ -24,7 +24,7 @@ public class GlobalResourceException extends RuntimeException {
      * detail message.  The cause is not initialized, and may subsequently be
      * initialized by a call to {@link #initCause}.
      */
-    public GlobalResourceException() {
+    public ResourceException() {
         super();
     }
 
@@ -36,7 +36,7 @@ public class GlobalResourceException extends RuntimeException {
      * @param message the detail message. The detail message is saved for
      *                later retrieval by the {@link #getMessage()} method.
      */
-    public GlobalResourceException(String message) {
+    public ResourceException(String message) {
         super(message);
     }
 
@@ -54,7 +54,7 @@ public class GlobalResourceException extends RuntimeException {
      *                unknown.)
      * @since 1.4
      */
-    public GlobalResourceException(String message, Throwable cause) {
+    public ResourceException(String message, Throwable cause) {
         super(message, cause);
     }
 
@@ -71,7 +71,7 @@ public class GlobalResourceException extends RuntimeException {
      *              unknown.)
      * @since 1.4
      */
-    public GlobalResourceException(Throwable cause) {
+    public ResourceException(Throwable cause) {
         super(cause);
     }
 
@@ -89,7 +89,7 @@ public class GlobalResourceException extends RuntimeException {
      *                           be writable
      * @since 1.7
      */
-    protected GlobalResourceException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+    protected ResourceException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
     }
 

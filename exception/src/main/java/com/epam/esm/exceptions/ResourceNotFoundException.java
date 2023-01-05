@@ -1,7 +1,7 @@
 package com.epam.esm.exceptions;
 
-public class ResourceNotFoundException extends GlobalResourceException {
-    public ResourceNotFoundException(String message, Long resourceId, String errorCode) {
+public class ResourceNotFoundException extends ResourceException {
+    public ResourceNotFoundException(String message, Long resourceId, ErrorCodes errorCode) {
         super(message, resourceId, errorCode);
     }
 

@@ -1,7 +1,7 @@
 package com.epam.esm.exceptions;
 
-public class InvalidResourcePropertyException extends GlobalResourceException {
-    public InvalidResourcePropertyException(String message, Long resourceId, String errorCode) {
+public class InvalidResourcePropertyException extends ResourceException {
+    public InvalidResourcePropertyException(String message, Long resourceId, ErrorCodes errorCode) {
         super(message, resourceId, errorCode);
     }
 

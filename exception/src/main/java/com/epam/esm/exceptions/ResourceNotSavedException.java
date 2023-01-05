@@ -1,7 +1,7 @@
 package com.epam.esm.exceptions;
 
-public class ResourceNotSavedException extends GlobalResourceException {
-    public ResourceNotSavedException(String message, Long resourceId, String errorCode) {
+public class ResourceNotSavedException extends ResourceException {
+    public ResourceNotSavedException(String message, Long resourceId, ErrorCodes errorCode) {
         super(message, resourceId, errorCode);
     }
 

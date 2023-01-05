@@ -1,11 +1,11 @@
 package com.epam.esm.exceptions;
 
-public class InvalidResourceNameException extends GlobalResourceException {
-    public InvalidResourceNameException(String message, String resourceName, String errorCode) {
+public class InvalidResourceNameException extends ResourceException {
+    public InvalidResourceNameException(String message, String resourceName, ErrorCodes errorCode) {
         super(message, resourceName, errorCode);
     }
 
-    public InvalidResourceNameException(String message, Long resourceId, String errorCode) {
+    public InvalidResourceNameException(String message, Long resourceId, ErrorCodes errorCode) {
         super(message, resourceId, errorCode);
     }
 
