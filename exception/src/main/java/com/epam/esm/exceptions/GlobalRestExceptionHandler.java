@@ -2,6 +2,7 @@ package com.epam.esm.exceptions;
 
 import com.mysql.cj.exceptions.MysqlErrorNumbers;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,24 +27,42 @@ public class GlobalRestExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(Throwable.class)
-    public final ResponseEntity<ApiErrorResponse> handleAllExceptions(Throwable ex) {
+    public final ResponseEntity<ApiErrorResponse> handleAllExceptionsAndErrors(Throwable ex) {
         ex.printStackTrace();
         ApiErrorResponse apiErrorResponse = new ApiErrorResponse();
         apiErrorResponse.setErrorCode(ErrorCodes.INTERNAL_SERVER_ERROR);
-        apiErrorResponse.setErrorMessage(ex.getLocalizedMessage());
+        apiErrorResponse.setErrorMessage("internal.server.error");
+        if (ex.getMessage().startsWith("get null list resources")) {
+            apiErrorResponse.setErrorMessage(translator.toLocale(ex.getMessage().replace(
+                    "get null list resources", "get.null.list.resources")));
+            apiErrorResponse.setErrorCode(ErrorCodes.NULL_RESOURCE);
+        }
         return new ResponseEntity<>(apiErrorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(DataAccessException.class)
+    public final ResponseEntity<ApiErrorResponse> handleDataAccessException(DataAccessException ex) {
+        ex.printStackTrace();
+        ApiErrorResponse apiErrorResponse = new ApiErrorResponse();
+        apiErrorResponse.setErrorCode(ErrorCodes.DATA_ACCESS_EXCEPTION);
+        apiErrorResponse.setErrorMessage("data.access.exception");
+        return new ResponseEntity<>(apiErrorResponse, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(SQLException.class)
     protected ResponseEntity<ApiErrorResponse> customerNotFound(SQLException ex) {
         ex.printStackTrace();
         ApiErrorResponse apiErrorResponse = new ApiErrorResponse();
-        apiErrorResponse.setErrorCode(String.valueOf(ex.getErrorCode()));
-        apiErrorResponse.setErrorMessage(translator.toLocale("mysql.error." + ex.getErrorCode()));
-        if (ex.getErrorCode() == MysqlErrorNumbers.ER_DUP_ENTRY)
+        apiErrorResponse.setErrorCode(ErrorCodes.SQL_ERROR);
+        apiErrorResponse.setErrorMessage("sql.error.default.message");
+        if (ex.getErrorCode() == MysqlErrorNumbers.ER_DUP_ENTRY) {
+            apiErrorResponse.setErrorMessage(translator.toLocale("mysql.error.duplicate.column"));
             apiErrorResponse.setErrorCode(ErrorCodes.SQL_DUPLICATE_ENTRY);
-        if (ex.getErrorCode() == MysqlErrorNumbers.ER_BAD_NULL_ERROR)
+        }
+        if (ex.getErrorCode() == MysqlErrorNumbers.ER_BAD_NULL_ERROR) {
+            apiErrorResponse.setErrorMessage(translator.toLocale("mysql.error.column.cannot.storage.null"));
             apiErrorResponse.setErrorCode(ErrorCodes.SQL_NULL_ENTRY);
+        }
         return new ResponseEntity<>(apiErrorResponse, HttpStatus.BAD_REQUEST);
     }
 
@@ -58,9 +77,11 @@ public class GlobalRestExceptionHandler extends ResponseEntityExceptionHandler {
         if (HttpStatus.INTERNAL_SERVER_ERROR.equals(status))
             request.setAttribute(WebUtils.ERROR_EXCEPTION_ATTRIBUTE, ex, WebRequest.SCOPE_REQUEST);
         ApiErrorResponse apiErrorResponse = new ApiErrorResponse();
-        apiErrorResponse.setErrorMessage(translator.toLocale(ex.getMessage()));
+        apiErrorResponse.setErrorMessage("default.unsupported.request-response.exception");
         apiErrorResponse.setErrorCode(status.value() + ErrorCodes.SUFFIX_RESPONSE_ENTITY_EXCEPTIONS);
         if (ex instanceof NoHandlerFoundException && ex.getMessage().startsWith("No handler found for")) {
+            status = HttpStatus.NOT_FOUND;
+            apiErrorResponse.setErrorCode(ErrorCodes.NO_HANDLER_FOUND);
             apiErrorResponse.setErrorMessage(ex.getMessage().replace(
                     "No handler found for", translator.toLocale("no.handler.found.for")));
         }
@@ -92,21 +113,7 @@ public class GlobalRestExceptionHandler extends ResponseEntityExceptionHandler {
         return handleResourceException(ex, HttpStatus.UNPROCESSABLE_ENTITY);
     }
 
-    @ExceptionHandler({IllegalStateException.class})
-    protected ResponseEntity<ApiErrorResponse> handleIllegalState(IllegalStateException ex) {
-        ex.printStackTrace();
-        ApiErrorResponse apiErrorResponse = new ApiErrorResponse();
-        apiErrorResponse.setErrorCode(ErrorCodes.INTERNAL_SERVER_ILLEGAL_STATE);
-        apiErrorResponse.setErrorMessage(ex.getLocalizedMessage());
-        if (ex.getMessage().startsWith("get null list resources")) {
-            apiErrorResponse.setErrorMessage(translator.toLocale(ex.getMessage().replace(
-                    "get null list resources", "get.null.list.resources")));
-            apiErrorResponse.setErrorCode(ErrorCodes.NULL_RESOURCE);
-        }
-        return new ResponseEntity<>(apiErrorResponse, HttpStatus.BAD_REQUEST);
-    }
-
-    protected ResponseEntity<ApiErrorResponse> handleResourceException(GlobalResourceException ex, HttpStatus httpStatus) {
+    protected ResponseEntity<ApiErrorResponse> handleResourceException(ResourceException ex, HttpStatus httpStatus) {
         ex.printStackTrace();
         ApiErrorResponse apiErrorResponse = new ApiErrorResponse();
         apiErrorResponse.setErrorCode(ex.getErrorCode());
