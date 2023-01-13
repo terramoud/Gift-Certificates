@@ -1,10 +1,11 @@
 package com.epam.esm.repository.impl;
 
 import com.epam.esm.domain.entity.Tag;
-import com.epam.esm.domain.entity.mapper.RequestParametersMapper;
 import com.epam.esm.domain.entity.mapper.TagRowMapper;
 import com.epam.esm.exceptions.*;
 import com.epam.esm.repository.api.TagRepository;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -15,7 +16,6 @@ import org.springframework.stereotype.Repository;
 import javax.sql.DataSource;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -23,15 +23,18 @@ import java.util.Optional;
 @Repository
 public class TagRepositoryImpl implements TagRepository {
 
-    public static final String SQL_FIND_TAG_BY_ID = "SELECT * FROM tag WHERE id = ? LIMIT 1";
+    public static final String SQL_FIND_TAG_BY_ID = "SELECT * FROM tag WHERE id = ?";
     public static final String SQL_FIND_ALL_TAGS = "SELECT * FROM tag";
     public static final String SQL_FIND_ALL_TAGS_BY_CERTIFICATE_ID =
             "SELECT * FROM tag INNER JOIN certificates_tags ct on tag.id = ct.tag_id WHERE certificate_id = ?";
     private static final String SQL_CREATE_TAG = "INSERT INTO tag VALUES (DEFAULT, ?)";
     private static final String SQL_UPDATE_TAG = "UPDATE tag SET name = ? WHERE id = ?";
     private static final String SQL_DELETE_TAG = "DELETE FROM tag WHERE id = ?";
+    private static final String SQL_FIND_ALL_SEARCHED_TAGS = "SELECT * FROM tag WHERE name LIKE ?";
 
     private final JdbcTemplate jdbcTemplate;
+
+    private static final Logger LOG = LogManager.getLogger(TagRepositoryImpl.class);
 
     @Autowired
     public TagRepositoryImpl(DataSource dataSource) {
@@ -39,16 +42,30 @@ public class TagRepositoryImpl implements TagRepository {
     }
 
     @Override
-    public List<Tag> getAllTags(List<String> sortParameters) {
-        RequestParametersMapper parametersMapper = new RequestParametersMapper();
-        String parameters = parametersMapper.mapSortParameters(sortParameters);
-        String sqlQuery = SQL_FIND_ALL_TAGS + " ORDER BY " + parameters;
+    public List<Tag> getAllTags(String sortParams, int limit, int offset) {
+        String sqlQuery = SQL_FIND_ALL_TAGS
+                .concat(" ORDER BY " + sortParams)
+                .concat(" LIMIT " + limit)
+                .concat(" OFFSET " + offset);
         return jdbcTemplate.query(sqlQuery, new TagRowMapper());
     }
 
     @Override
-    public List<Tag> getAllTags(List<String> sortParameters, String query) {
-        return Collections.emptyList();
+    public List<Tag> searchAllTags(String sortParams, int limit, int offset, String searchQuery) {
+        String sqlQuery = SQL_FIND_ALL_SEARCHED_TAGS
+                .concat(" ORDER BY " + sortParams)
+                .concat(" LIMIT " + limit)
+                .concat(" OFFSET " + offset);
+        return jdbcTemplate.query(sqlQuery, new Object[]{"%" + searchQuery + "%"}, new TagRowMapper());
+    }
+
+    @Override
+    public List<Tag> getTagsByCertificateId(String sortParams, int limit, int offset, Long certificateId) {
+        String sqlQuery = SQL_FIND_ALL_TAGS_BY_CERTIFICATE_ID
+                .concat(" ORDER BY " + sortParams)
+                .concat(" LIMIT " + limit)
+                .concat(" OFFSET " + offset);
+        return jdbcTemplate.query(sqlQuery, new Object[] {certificateId}, new TagRowMapper());
     }
 
     @Override
@@ -57,15 +74,9 @@ public class TagRepositoryImpl implements TagRepository {
             return Optional.ofNullable(jdbcTemplate.queryForObject(
                     SQL_FIND_TAG_BY_ID, new Object[]{tagId}, new TagRowMapper()));
         } catch (EmptyResultDataAccessException e) {
-            e.printStackTrace();
+            LOG.warn("Cannot get Tag by ig = '{}'", tagId, e);
             return Optional.empty();
         }
-    }
-
-    @Override
-    public List<Tag> getTagsByCertificateId(Long certificateId) {
-        return jdbcTemplate.query(
-                SQL_FIND_ALL_TAGS_BY_CERTIFICATE_ID, new Object[] {certificateId}, new TagRowMapper());
     }
 
     @Override

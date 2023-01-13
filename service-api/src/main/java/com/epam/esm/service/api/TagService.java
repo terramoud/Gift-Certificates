@@ -8,17 +8,17 @@ import java.util.Map;
 
 public interface TagService {
 
-    List<Tag> getAllTags(List<String> sortParameters);
+    List<Tag> getAllTags(List<String> sortParameters, int limit, int offset);
 
-    List<Tag> getAllTags(List<String> sortParameters, String query);
+    List<Tag> searchAllTags(List<String> sortParams, int limit, int offset, String searchQuery);
 
-    List<Tag> getTagsByCertificateId(Long certificateId);
+    List<Tag> getTagsByCertificateId(List<String> sortParams, int limit, int offset, Long certificateId);
 
     Tag getTagById(Long tagId);
 
     Tag addTag(Tag tag);
 
-    Tag updateTagById(Long tagId, Map<String, Object> body);
+    Tag updateTagById(Long tagId, Map<String, String> body);
 
     Tag deleteTagById(Long tagId);
 }

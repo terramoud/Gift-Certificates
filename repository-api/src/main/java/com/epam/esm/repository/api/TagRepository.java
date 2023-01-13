@@ -6,13 +6,13 @@ import java.util.List;
 import java.util.Optional;
 
 public interface TagRepository {
+    List<Tag> getAllTags(String sortParameters, int limit, int offset);
+
+    List<Tag> searchAllTags(String sortParams, int limit, int offset, String searchQuery);
+
+    List<Tag> getTagsByCertificateId(String sortParams, int limit, int offset, Long certificateId);
+
     Optional<Tag> getTagById(Long tagId);
-
-    List<Tag> getAllTags(List<String> sortParameters);
-
-    List<Tag> getAllTags(List<String> sortParameters, String query);
-
-    List<Tag> getTagsByCertificateId(Long certificateId);
 
     Tag addTag(Tag tag);
 

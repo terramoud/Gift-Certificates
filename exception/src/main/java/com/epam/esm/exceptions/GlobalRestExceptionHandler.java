@@ -3,6 +3,8 @@ package com.epam.esm.exceptions;
 import com.mysql.cj.exceptions.MysqlErrorNumbers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,7 +34,7 @@ public class GlobalRestExceptionHandler extends ResponseEntityExceptionHandler {
         ApiErrorResponse apiErrorResponse = new ApiErrorResponse();
         apiErrorResponse.setErrorCode(ErrorCodes.INTERNAL_SERVER_ERROR.stringCode());
         apiErrorResponse.setErrorMessage("internal.server.error");
-        if (ex.getMessage().startsWith("get null list resources")) {
+        if (ex.getMessage() != null && ex.getMessage().startsWith("get null list resources")) {
             apiErrorResponse.setErrorMessage(translator.toLocale(ex.getMessage().replace(
                     "get null list resources", "get.null.list.resources")));
             apiErrorResponse.setErrorCode(ErrorCodes.NULL_INSTEAD_LIST.stringCode());
@@ -46,6 +48,24 @@ public class GlobalRestExceptionHandler extends ResponseEntityExceptionHandler {
         ApiErrorResponse apiErrorResponse = new ApiErrorResponse();
         apiErrorResponse.setErrorCode(ErrorCodes.DATA_ACCESS_EXCEPTION.stringCode());
         apiErrorResponse.setErrorMessage("data.access.exception");
+        return new ResponseEntity<>(apiErrorResponse, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public final ResponseEntity<ApiErrorResponse> handleDataAccessException(DataIntegrityViolationException ex) {
+        ex.printStackTrace();
+        ApiErrorResponse apiErrorResponse = new ApiErrorResponse();
+        apiErrorResponse.setErrorCode(ErrorCodes.DATA_INTEGRITY_VIOLATION.stringCode());
+        apiErrorResponse.setErrorMessage("data.integrity.violation");
+        return new ResponseEntity<>(apiErrorResponse, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(DuplicateKeyException.class)
+    public final ResponseEntity<ApiErrorResponse> handleDuplicateKey(DuplicateKeyException ex) {
+        ex.printStackTrace();
+        ApiErrorResponse apiErrorResponse = new ApiErrorResponse();
+        apiErrorResponse.setErrorMessage(translator.toLocale("mysql.error.duplicate.column"));
+        apiErrorResponse.setErrorCode(ErrorCodes.SQL_DUPLICATE_ENTRY.stringCode());
         return new ResponseEntity<>(apiErrorResponse, HttpStatus.BAD_REQUEST);
     }
 
@@ -119,5 +139,18 @@ public class GlobalRestExceptionHandler extends ResponseEntityExceptionHandler {
         apiErrorResponse.setErrorCode(ex.getErrorCode());
         apiErrorResponse.setErrorMessage(translator.toLocale(ex.getMessage()) + " " + ex.getDetails());
         return new ResponseEntity<>(apiErrorResponse, httpStatus);
+    }
+
+    @ExceptionHandler(InvalidPaginationParameterException.class)
+    public final ResponseEntity<ApiErrorResponse> handleInvalidInputParameter(InvalidPaginationParameterException ex) {
+        ex.printStackTrace();
+        ApiErrorResponse apiErrorResponse = new ApiErrorResponse();
+        apiErrorResponse.setErrorMessage(
+                translator.toLocale("error.invalid.pagination.parameter")
+                        .concat(" " + ex.getParameterName())
+                        .concat(translator.toLocale("cannot.be"))
+                        .concat(" " + ex.getParameterValue()));
+        apiErrorResponse.setErrorCode(ex.getErrorCode());
+        return new ResponseEntity<>(apiErrorResponse, HttpStatus.BAD_REQUEST);
     }
 }

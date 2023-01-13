@@ -1,8 +1,7 @@
 package com.epam.esm.domain.entity;
 
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotNull;
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -16,6 +15,7 @@ import java.util.Objects;
  * @since 1.0
  */
 public class Certificate extends Entity {
+    private static final String PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSS";
 
     private String description;
 
@@ -30,11 +30,11 @@ public class Certificate extends Entity {
     public Certificate() {
     }
 
-    public Certificate(long id,
+    public Certificate(Long id,
                        String name,
                        String description,
                        BigDecimal price,
-                       int duration,
+                       Integer duration,
                        LocalDateTime createDate,
                        LocalDateTime lastUpdateDate) {
         this.id = id;
@@ -70,12 +70,13 @@ public class Certificate extends Entity {
         this.duration = duration;
     }
 
+    @JsonFormat(pattern = PATTERN)
     public LocalDateTime getCreateDate() {
         return createDate;
     }
 
     public void setCreateDate(String createDate) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS")
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(PATTERN)
                 .withZone(ZoneId.of("UTC"));
         this.createDate = LocalDateTime.parse(createDate, formatter);
     }
@@ -84,14 +85,15 @@ public class Certificate extends Entity {
         this.createDate = createDate;
     }
 
+    @JsonFormat(pattern = PATTERN)
     public LocalDateTime getLastUpdateDate() {
         return lastUpdateDate;
     }
 
     public void setLastUpdateDate(String lastUpdateDate) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS")
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(PATTERN)
                 .withZone(ZoneId.of("UTC"));
-        this.createDate = LocalDateTime.parse(lastUpdateDate, formatter);
+        this.lastUpdateDate = LocalDateTime.parse(lastUpdateDate, formatter);
     }
 
     public void setLastUpdateDate(LocalDateTime lastUpdateDate) {

@@ -9,16 +9,21 @@ import org.springframework.core.env.Environment;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import javax.sql.DataSource;
 import java.util.List;
+import java.util.Objects;
 
 @Configuration
 @EnableWebMvc
+@EnableTransactionManagement
 @ComponentScan(basePackages = {"com.epam.esm"})
 @PropertySource("classpath:messages.properties")
 @PropertySource("classpath:messages_uk.properties")
@@ -58,8 +63,12 @@ public class SpringWebConfig implements WebMvcConfigurer {
         driverManagerDataSource.setUrl(environment.getProperty("url"));
         driverManagerDataSource.setUsername(environment.getProperty("db_user"));
         driverManagerDataSource.setPassword(environment.getProperty("db_pwd"));
-        driverManagerDataSource.setDriverClassName(environment.getProperty("driver.mysql"));
+        driverManagerDataSource.setDriverClassName(Objects.requireNonNull(environment.getProperty("driver")));
         return driverManagerDataSource;
+    }
+
+    @Bean public PlatformTransactionManager txManager() {
+        return new DataSourceTransactionManager(dataSource());
     }
 
     @Override

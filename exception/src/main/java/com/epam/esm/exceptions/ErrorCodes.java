@@ -14,15 +14,16 @@ public enum ErrorCodes {
     INVALID_CERTIFICATE_PROPERTY(40003, "Invalid gift certificate's property"),
     INVALID_TAG_PROPERTY(40004, "Invalid gift tag's property"),
     INVALID_CERTIFICATE_ID_PROPERTY(40005, "Invalid gift certificate's id property"),
-    INVALID_TAG_ID_PROPERTY(40006, "Invalid gift tad's id property"),
-    INVALID_TAG_NAME_PROPERTY(40007, "Invalid gift tag's name property"),
+    INVALID_TAG_ID_PROPERTY(40006, "Invalid tag's id property"),
+    INVALID_TAG_NAME_PROPERTY(40007, "Invalid tag's name property"),
     DATA_ACCESS_EXCEPTION(40009, "Unable get or put data to database"),
+    DATA_INTEGRITY_VIOLATION(40010, "Cannot add or update row: a foreign key constraint fails"),
+    INVALID_PAGINATION_PARAMETER(40011, "Invalid value of SQL parameters: LIMIT or OFFSET or ORDER BY"),
     INTERNAL_SERVER_ERROR(50001, "An error or exception occurred on the server side"),
     NULL_INSTEAD_LIST(50002, "Returns null instead of List<>"),
     SQL_ERROR(50003, "Default code for all sql exceptions");
 
     private final int code;
-
     private final String reasonPhrase;
 
     ErrorCodes(int code, String reasonPhrase) {

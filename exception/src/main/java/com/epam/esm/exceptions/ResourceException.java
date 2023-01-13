@@ -15,7 +15,7 @@ public class ResourceException extends RuntimeException {
 
     public ResourceException(String message, String resourceName, ErrorCodes errorCode) {
         super(message);
-        this.details = "(name = " + resourceName + ")";
+        this.details = "(property = " + resourceName + ")";
         this.errorCode = errorCode.stringCode();
     }
 

@@ -10,6 +10,15 @@ import java.util.Objects;
  */
 public class Tag extends Entity {
 
+    public Tag(Long id, String name) {
+        this.id = id;
+        this.name = name;
+    }
+
+    public Tag() {
+
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

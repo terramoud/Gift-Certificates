@@ -2,10 +2,12 @@ package com.epam.esm.domain.entity.mapper;
 
 import com.epam.esm.domain.entity.Tag;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.stereotype.Component;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+@Component
 public class TagRowMapper implements RowMapper<Tag> {
     /**
      * Implementations must implement this method to map each row of data

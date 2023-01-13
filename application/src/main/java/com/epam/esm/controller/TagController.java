@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
-import java.util.function.BiFunction;
 
 @RestController
 @RequestMapping("api/v1/tags")
@@ -26,29 +25,38 @@ public class TagController {
         this.certificateService = certificateService;
     }
 
-    private final Map<Boolean, BiFunction<List<String>, String, List<Tag>>> getAllTags = Map.of(
-            true, (sortParameters, query) -> tagService.getAllTags(sortParameters),
-            false, (sortParameters, query) -> tagService.getAllTags(sortParameters, query)
-    );
-
     @GetMapping
     public ResponseEntity<List<Tag>> getAllTags(
-            @RequestParam(value = "sort_by", defaultValue = "name:asc") List<String> sortParams,
-            @RequestParam(value = "search_by", defaultValue = "") String searchQuery) {
-        List<Tag> tags = getAllTags.get(searchQuery.isEmpty()).apply(sortParams, searchQuery);
+            @RequestParam(value = "sort-by", defaultValue = "name:asc") List<String> sortParams,
+            @RequestParam(value = "search-by", defaultValue = "") String searchQuery,
+            @RequestParam(value = "limit", defaultValue = "5") int limit,
+            @RequestParam(value = "start", defaultValue = "0") int offset) {
+        if (limit < 1) limit = 1;
+        if (offset < 0) offset = 0;
+        List<Tag> tags;
+        if (searchQuery != null) {
+            tags = tagService.searchAllTags(sortParams, limit, offset, searchQuery);
+            return new ResponseEntity<>(tags, HttpStatus.OK);
+        }
+        tags = tagService.getAllTags(sortParams, limit, offset);
         return new ResponseEntity<>(tags, HttpStatus.OK);
     }
 
-    @GetMapping("/{tag_id}")
-    public ResponseEntity<Tag> getTagById(@PathVariable("tag_id") Long tagId) {
-        Tag tag = tagService.getTagById(tagId);
-        return new ResponseEntity<>(tag, HttpStatus.OK);
+    @GetMapping("/{tag-id}/gift-certificates")
+    public ResponseEntity<List<Certificate>> getGiftCertificatesByTagId(
+            @PathVariable("tag-id") Long tagId,
+            @RequestParam(value = "sort-by", defaultValue = "name:asc") List<String> sortParams,
+            @RequestParam(value = "limit", defaultValue = "5") int limit,
+            @RequestParam(value = "start", defaultValue = "0") int offset) {
+        List<Certificate> giftCertificates =
+                certificateService.getAllCertificatesByTagId(sortParams, limit, offset, tagId);
+        return new ResponseEntity<>(giftCertificates, HttpStatus.OK);
     }
 
-    @GetMapping("/{tag_id}/gift_certificates")
-    public ResponseEntity<List<Certificate>> getGiftCertificatesByTagId(@PathVariable("tag_id") Long tagId) {
-        List<Certificate> giftCertificates = certificateService.getAllCertificatesByTagId(tagId);
-        return new ResponseEntity<>(giftCertificates, HttpStatus.OK);
+    @GetMapping("/{tag-id}")
+    public ResponseEntity<Tag> getTagById(@PathVariable("tag-id") Long tagId) {
+        Tag tag = tagService.getTagById(tagId);
+        return new ResponseEntity<>(tag, HttpStatus.OK);
     }
 
     @PostMapping
@@ -57,16 +65,16 @@ public class TagController {
         return new ResponseEntity<>(addedTag, HttpStatus.CREATED);
     }
 
-    @PutMapping("/{tag_id}")
+    @PutMapping("/{tag-id}")
     public ResponseEntity<Tag> updateTagById(
-            @PathVariable("tag_id") Long tagId,
-            @RequestBody Map<String, Object> body) {
+            @PathVariable("tag-id") Long tagId,
+            @RequestBody Map<String, String> body) {
         Tag updatedTag = tagService.updateTagById(tagId, body);
         return new ResponseEntity<>(updatedTag, HttpStatus.OK);
     }
 
-    @DeleteMapping("/{tag_id}")
-    public ResponseEntity<Tag> deleteTagById(@PathVariable("tag_id") Long tagId) {
+    @DeleteMapping("/{tag-id}")
+    public ResponseEntity<Tag> deleteTagById(@PathVariable("tag-id") Long tagId) {
         Tag tag = tagService.deleteTagById(tagId);
         return new ResponseEntity<>(tag, HttpStatus.OK);
     }
